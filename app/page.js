@@ -4,6 +4,7 @@ import {useState, useEffect} from 'react';
 import {firestore} from '@/firebase'
 import {Box, Modal, Typography, Stack, TextField, Button} from '@mui/material'
 import {collection, query, getDocs, deleteDoc, doc, getDoc, setDoc} from 'firebase/firestore';
+import debounce from 'lodash.debounce'
 
 export default function Home() {
   const [inventory, setInventory] = useState([])
@@ -23,6 +24,17 @@ export default function Home() {
     })
     setInventory(inventoryList)
   }
+
+  const debouncedResults = useMemo(() => {
+    return debounce(handleChange, 300);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      debouncedResults.cancel();
+    };
+  });
+  
 
   const addItem = async(item) =>{
     const docRef = doc(collection(firestore, 'inventory'), item)
@@ -134,6 +146,8 @@ export default function Home() {
         display='flex'
 
         >
+          <input type='text' onChange={debouncedResults} />
+          
           <Typography variant='h2' color='#333'>
             Inventory Items
           </Typography>
